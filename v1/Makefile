@@ -62,6 +62,15 @@ run:
 ##
 ## gdb --eval-command='target remote :1234'
 
+## layout asm ; change layout...
+## layout regs
+## display/i $pc
+## x/i $pc
+## set  disassemble-next-line on
+## show disassemble-next-line
+## stepi
+
+
 #GDB_EC = --eval-command='target remote :1234; file $(KERNEL)'
 GDB_EC = --eval-command='target remote :1234'
 gdb:
