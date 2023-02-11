@@ -13,6 +13,8 @@ image_bake: image_rm
 	parted -s $(DISK) mklabel gpt
 	parted -s $(DISK) mkpart ESP fat32 2048s 100%
 	parted -s $(DISK) set 1 esp on
+	make image_write_mbr
+	make image_read_mbr
 
 image_info:
 	fdisk -l $(DISK)
@@ -21,6 +23,19 @@ image: image_bake image_info
 
 image_read_mbr:
 	dd if=$(DISK) bs=1 count=446 | xxd
+
+image_write_mbr:
+	dd if=mbr.bin bs=1M count=64 of=$(DISK) conv=notrunc seek=0
+
+##################
+### asm to bin
+#################
+
+MBRASM = mbr.asm
+
+translate:
+	nasm mbr.asm -o mbr.bin
+	objdump -D -b binary -mi386 -Maddr16,data16 mbr.bin
 
 ##############################
 ### run QEMU in debug mode ###
@@ -47,7 +62,7 @@ Q_DEBUG=-S -s
 Q_DRIVE = -drive file=$(DISK),media=disk,format=raw
 
 run:
-	qemu-system-x86_64 -M q35 $(Q_RAM) $(Q_DEBUG) $(DRIVE)
+	qemu-system-x86_64 -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE)
 
 
 ###########
@@ -70,11 +85,16 @@ run:
 ## show disassemble-next-line
 ## stepi
 
+## gdb -x <command-file>
 
 #GDB_EC = --eval-command='target remote :1234; file $(KERNEL)'
 GDB_EC = --eval-command='target remote :1234'
+GDB_QUIET = -q
 gdb:
-	gdb $(GDB_EC)
+	gdb $(GDB_QUIET) $(GDB_EC)
 
+gdb_1:
+	gdb $(GDB_QUIET) $(GDB_EC) --ex='break *0x7c00' --ex='c' --ex='info reg cs' --ex=si --ex='info reg cs'
 
-
+vnc:
+	vncviewer 127.0.0.1:5900
