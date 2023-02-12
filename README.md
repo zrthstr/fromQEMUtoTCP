@@ -9,9 +9,35 @@ Building a simple OS for fun - trying to better understand things along the way 
 * Networks/TCP/IP
 * cs in general
 
+General reading:
+* osdev-wiki
+* https://wiki.osdev.org/Protected_Mode
+
+TBD reading:
+* https://akkadia.org/drepper/cpumemory.pdf
+* https://manybutfinite.com/post/memory-translation-and-segmentation/
+* https://manybutfinite.com/post/cpu-rings-privilege-and-protection/
+* https://manybutfinite.com/post/getting-physical-with-memory/
+* https://manybutfinite.com/post/how-the-kernel-manages-your-memory/
+* https://manybutfinite.com/post/page-cache-the-affair-between-memory-and-files/
+* https://manybutfinite.com/post/journey-to-the-stack/
+* https://manybutfinite.com/post/system-calls/
+
 ## v1-hello-os
-minimal bare bone 'OS', all inside MBR, running in x86 real mode, saying hello to the world
+Reading:
+* osdev-wiki
+* https://manybutfinite.com/post/motherboard-chipsets-memory-map/
+* https://manybutfinite.com/post/how-computers-boot-up/
+* https://manybutfinite.com/post/kernel-boot-process/
+
+Minimal bare bone 'OS', all inside MBR, running in x86 real mode, saying hello to the world
 
 ![QEMU with vnc](https://github.com/zrthstr/fromQEMUtoTCP/blob/main/v1-hello-os/doc/screen.png)
 
 ## v2-tbd
+Reading:
+* https://en.wikipedia.org/wiki/BIOS_interrupt_call (wip)
+* https://en.wikipedia.org/wiki/INT_13H (wip)
+* https://en.wikipedia.org/wiki/Logical_block_addressing (tbd)
+
+Expand on v1, try to raw read a few kb from partition0 into ram and run
