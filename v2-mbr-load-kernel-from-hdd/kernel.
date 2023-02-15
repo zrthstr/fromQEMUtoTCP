@@ -1,0 +1,2 @@
+[bits 16]  ; we start of in RealMode, apparently this implies 16 bit, but only kinda..
+[org 0x7c00]
