@@ -47,3 +47,5 @@ Expand on v1, try to raw read/read via bios interup a few kb from hdd partition0
 
 ## v3-tbd
 trying to get from asm to c
+Reading:
+* https://wiki.osdev.org/Creating_a_64-bit_kernel
