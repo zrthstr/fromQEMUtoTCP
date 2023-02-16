@@ -44,3 +44,6 @@ Reading:
 * https://wiki.osdev.org/ATA_in_x86_RealMode_(BIOS) (tbd)
 
 Expand on v1, try to raw read/read via bios interup a few kb from hdd partition0 into ram and jump to
+
+## v3-tbd
+trying to get from asm to c
