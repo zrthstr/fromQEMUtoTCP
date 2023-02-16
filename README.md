@@ -12,6 +12,7 @@ Building a simple OS for fun - trying to better understand things along the way 
 General reading:
 * osdev-wiki
 * https://wiki.osdev.org/Protected_Mode
+* https://wiki.osdev.org/Rolling_Your_Own_Bootloader (!!)
 
 TBD reading:
 * https://akkadia.org/drepper/cpumemory.pdf
@@ -34,10 +35,12 @@ Minimal bare bone 'OS', all inside MBR, running in x86 real mode, saying hello t
 
 ![QEMU with vnc](https://github.com/zrthstr/fromQEMUtoTCP/blob/main/v1-hello-os/doc/screen.png)
 
-## v2-tbd
+## v2-mbr-load-kernel-from-hdd
 Reading:
+* https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=42h:_Extended_Read_Sectors_From_Drive
 * https://en.wikipedia.org/wiki/BIOS_interrupt_call (wip)
 * https://en.wikipedia.org/wiki/INT_13H (wip)
 * https://en.wikipedia.org/wiki/Logical_block_addressing (tbd)
+* https://wiki.osdev.org/ATA_in_x86_RealMode_(BIOS) (tbd)
 
-Expand on v1, try to raw read a few kb from partition0 into ram and run
+Expand on v1, try to raw read/read via bios interup a few kb from hdd partition0 into ram and jump to
