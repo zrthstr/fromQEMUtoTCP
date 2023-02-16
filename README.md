@@ -45,7 +45,8 @@ Reading:
 
 Expand on v1, try to raw read/read via bios interup a few kb from hdd partition0 into ram and jump to
 
-## v3-tbd
+## v3-getting-to-c
 trying to get from asm to c
 Reading:
 * https://wiki.osdev.org/Creating_a_64-bit_kernel
+* https://wiki.osdev.org/GCC_Cross-Compiler
