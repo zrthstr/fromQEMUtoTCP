@@ -5,7 +5,7 @@
 * load next stage from disk
 * transfers controll to next stage
 * next stage could possible allready be the final kernel..
-* at some point we switch from RealMode ot ProtecedMode
+* at some point we switch from RealMode ot ProtectedMode
 
 
 ### low level plan

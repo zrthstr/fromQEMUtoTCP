@@ -11,10 +11,14 @@ Building a simple OS for fun - trying to better understand things along the way 
 
 General reading:
 * osdev-wiki
-* https://wiki.osdev.org/Protected_Mode
-* https://wiki.osdev.org/Rolling_Your_Own_Bootloader (!!)
+* https://www.cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
+* https://wiki.osdev.org/Rolling_Your_Own_Bootloader
+* https://wiki.osdev.org/Exceptions#General_Protection_Fault
+* https://github.com/thomasloven/mittos64/tree/master/doc
 
-TBD reading:
+Why does the MBR go to `x07c00`? -> https://www.glamenv-septzen.net/en/view/6
+
+partially TBD - reading:
 * https://akkadia.org/drepper/cpumemory.pdf
 * https://manybutfinite.com/post/memory-translation-and-segmentation/
 * https://manybutfinite.com/post/cpu-rings-privilege-and-protection/
@@ -38,15 +42,39 @@ Minimal bare bone 'OS', all inside MBR, running in x86 real mode, saying hello t
 ## v2-mbr-load-kernel-from-hdd
 Reading:
 * https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=42h:_Extended_Read_Sectors_From_Drive
-* https://en.wikipedia.org/wiki/BIOS_interrupt_call (wip)
-* https://en.wikipedia.org/wiki/INT_13H (wip)
-* https://en.wikipedia.org/wiki/Logical_block_addressing (tbd)
-* https://wiki.osdev.org/ATA_in_x86_RealMode_(BIOS) (tbd)
+* https://en.wikipedia.org/wiki/BIOS_interrupt_call
+* https://en.wikipedia.org/wiki/INT_13H
+* https://en.wikipedia.org/wiki/Logical_block_addressing
+* https://wiki.osdev.org/ATA_in_x86_RealMode_(BIOS)
 
 Expand on v1, try to raw read/read via bios interup a few kb from hdd partition0 into ram and jump to
 
 ## v3-getting-to-c
-trying to get from asm to c
-Reading:
+Trying to get from asm to c.
+This did but was to early as we were still in 16bit real mode..
+
+reading:
 * https://wiki.osdev.org/Creating_a_64-bit_kernel
 * https://wiki.osdev.org/GCC_Cross-Compiler
+
+## v4-getting-into-proteced-mode
+set up gtd, then enable proteced mode
+switched to bochs for now for simpler debugging of real mode..
+reading:
+* https://wiki.osdev.org/Protected_Mode
+* https://wiki.osdev.org/Global_Descriptor_Table
+
+## v5-tbd
+maybe:
+print msg via VGA form asm
+load 32 bit kernel
+print another msg
+
+reading:
+* https://wiki.osdev.org/Printing_To_Screen
+* https://wiki.osdev.org/Detecting_Colour_and_Monochrome_Monitors
+
+
+## TBD
+* paging
+* 64bit longmode

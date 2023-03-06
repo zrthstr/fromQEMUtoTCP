@@ -1,2 +1,5 @@
 MentOS
 limine-barebones
+*.hdd
+*.hdd.lock
+*.bin
