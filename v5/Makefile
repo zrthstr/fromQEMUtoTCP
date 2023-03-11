@@ -3,7 +3,12 @@ KERNEL=kernel.elf
 
 #CC = gcc
 CC = i686-elf-gcc
-CFLAG = -ffreestanding -mno-red-zone -O0
+
+# https://wiki.osdev.org/Creating_a_64-bit_kernel
+
+CSTYLE = -Wall -Wextra -std=c89 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
+ASMTYPE = -masm=intel
+CFLAG = -ffreestanding -mno-red-zone -O0 -mno-sse -mno-sse2 $(CSTYLE) $(ASMTYPE)
 
 CCC = $(CC) $(CFLAG)
 
@@ -41,20 +46,20 @@ image_info:
 image: image_bake image_info
 
 image_read_mbr:
-	dd if=$(DISK) bs=1 count=446 | xxd
+	dd if=$(DISK) bs=1 count=446 | xxd 
 
 image_read_kernel:
-	cat kernel.bin | xxd 
+	cat kernel.bin | xxd | grep -v '6690 6690 6690 6690 6690 6690 6690 6690' | grep -v '0000 0000 0000 0000 0000 0000 0000 0000'
 
 image_write_mbr:
 	dd if=mbr.bin bs=1M count=64 of=$(DISK) conv=notrunc seek=0
 
 image_write_kernel:
-	#dd if=kernel.bin of=$(DISK) bs=1MB count=1 seek=1 conv=notrunc
 	dd if=kernel.bin of=$(DISK) bs=1M count=1 seek=1 conv=notrunc
+	#dd if=kernel.bin of=$(DISK) bs=1047040 count=1 seek=1 conv=notrunc
 
-image_disk_pattern:
-	python -c 'import string;print(string.ascii_letters*20)' > $(DISK_PATTERN)
+#image_disk_pattern:
+#	python -c 'import string;print(string.ascii_letters*20)' > $(DISK_PATTERN)
 
 ##################
 ### asm to bin
@@ -67,11 +72,13 @@ translate_mbr:
 	objdump -D -b binary -mi386 -Maddr16,data16 mbr.bin
 
 translate_kernel:
-	#nasm kernel.asm -o kernel.bin
-	#objdump -D -b binary -mi386 -Maddr16,data16 kernel.bin
-	#$(CC) -S  kernel.c -o kernel.s
-	$(CCC) kernel.c
-	nasm kernel.s -o kernel.bin
+	@#i686-elf-gcc -O0 -c kernel.c -o kernel.o
+	@#$(CCC) -T link.ld kernel.o -o kernel.bin -nostdlib -lgcc
+	$(CCC) -T link.ld kernel.c -o kernel.bin -nostdlib -lgcc
+
+	@#objdump -D -b binary -mi386 -Maddr16,data16 kernel.bin
+	objdump -d kernel.bin -M intel,intel-mnemonic | grep -v 'xchg   ax,ax'
+	@#i686-elf-gcc  -ffreestanding -mcmodel=large   -mno-red-zone  -mno-mmx -mno-sse -mno-sse2  -T link.ld  kernel.o   -o kernel.bin -nostdlib -lgcc
 
 translate: translate_mbr translate_kernel
 
@@ -87,20 +94,17 @@ Q_RAM=-m 2G
 # -S   mean wait for GDB to run. Usefull for debugging startup
 Q_DEBUG=-S -s
 
-
-### qemu -drive
-# Instead of -hda, -hdb, -hdc, -hdd, you can use:
-#
-# qemu-system-x86_64 -drive file=file,index=0,media=disk
-# qemu-system-x86_64 -drive file=file,index=1,media=disk
-# qemu-system-x86_64 -drive file=file,index=2,media=disk
-# qemu-system-x86_64 -drive file=file,index=3,media=disk
-
-#Q_DRIVE = -hda
 Q_DRIVE = -drive file=$(DISK),media=disk,format=raw
 
+bochs:
+	#bochs -qf /dev/null -rc /dev/null 'megs:2000' 'boot:disk' 'ata0-master: type=disk, path="disk.hdd", mode=flat' 'display_library: nogui' 'magic_break: enabled=1' 'cpu: reset_on_triple_fault=1'
+	bochs -qf /dev/null -rc /dev/null 'megs:2000' 'boot:disk' 'ata0-master: type=disk, path="disk.hdd", mode=flat' 'magic_break: enabled=1' 'cpu: reset_on_triple_fault=1'
+
+
 run:
-	qemu-system-x86_64 -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE)
+	#qemu-system-x86_64 -no-reboot -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE) -monitor stdio -no-shutdown 
+	# qemu-system-i386
+	qemu-system-x86_64 -no-reboot -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE) -monitor stdio  -d cpu_reset,int,guest_errors
 
 
 ###########
@@ -108,8 +112,6 @@ run:
 ###########
 
 ## > file <my-kernel-binary>
-## > remote target :1234
-## 
 ## # Inspect page tables
 ## x /8wg &page_tables_start
 ##
@@ -136,3 +138,5 @@ gdb_1:
 
 vnc:
 	vncviewer 127.0.0.1:5900
+
+all: translate image_bake bochs

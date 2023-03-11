@@ -15,6 +15,7 @@ General reading:
 * https://wiki.osdev.org/Rolling_Your_Own_Bootloader
 * https://wiki.osdev.org/Exceptions#General_Protection_Fault
 * https://github.com/thomasloven/mittos64/tree/master/doc
+* https://github.com/tuhdo/os01/blob/master/Operating_Systems_From_0_to_1.pdf
 
 Why does the MBR go to `x07c00`? -> https://www.glamenv-septzen.net/en/view/6
 

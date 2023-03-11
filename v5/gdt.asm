@@ -3,7 +3,7 @@ gdt_start:
 gdt_null: ; the mandatory null descriptor
   dd 0 x0 ; ’dd ’ means define double word ( i.e. 4 bytes )
   dd 0 x0
-gdt_code: ; the code segment descriptor
+  gdt_code: ; the code segment descriptor
   ; base =0x0 , limit =0 xfffff ,
   ; 1st flags : ( present )1 ( privilege )00 ( descriptor type )1 -> 1001 b
   ; type flags : ( code )1 ( conforming )0 ( readable )1 ( accessed )0 -> 1010 b
