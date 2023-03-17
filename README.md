@@ -65,11 +65,11 @@ reading:
 * https://wiki.osdev.org/Protected_Mode
 * https://wiki.osdev.org/Global_Descriptor_Table
 
-## v5-tbd
-maybe:
-print msg via VGA form asm
-load 32 bit kernel
-print another msg
+## v5-propperly-to-c
+make propper linker script
+load 32 bit kernel as elf
+print msg via VGA from c
+
 
 reading:
 * https://wiki.osdev.org/Printing_To_Screen

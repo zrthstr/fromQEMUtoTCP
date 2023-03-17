@@ -3,8 +3,9 @@ int kprint(const char *string);
 
 void main(void){
 
-	char test[] = "test sitng\n";
-	kprint("arrived in protected mode..\n");
+	kprint("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa\n");
+
+	char test[] = "ABCBBBBBBBBBBBb\n";
 	kprint(test);
 	for(;;){
 	}

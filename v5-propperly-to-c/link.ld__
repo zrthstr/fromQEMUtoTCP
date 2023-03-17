@@ -1,0 +1,25 @@
+ENTRY(main)
+
+SECTIONS
+{
+    /* Define the text section at physical address 0x600 */
+    .text 0x600 :
+    {
+        *(.text)
+    }
+
+    /* Define the data section at physical address 0x700 */
+    .data 0x700 :
+    {
+        *(.data)
+    }
+
+    /* Define the bss section at physical address 0x800 */
+    .bss 0x800 :
+    {
+        *(.bss)
+    }
+
+    /* Define the end of the binary */
+    end_of_binary = .;
+}

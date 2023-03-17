@@ -75,8 +75,8 @@ init_pm:
   mov ecx, 2 * 21 * 80
   call print_string_pm
 
-  jmp 0xc00                   ; ze kernel we read from disk
-  ;jmp 0x600                   ; ze kernel we read from disk
+  ;jmp 0xc00                   ; ze kernel we read from disk
+  jmp 0x600                   ; ze kernel we read from disk
 
   call Forever32 ; Finally , call some well - known label
 
