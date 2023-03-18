@@ -1,19 +1,22 @@
-#define BLACK 0
-#define GREEN 10
+#define BLACK 0x00
+#define GREEN 0x0A
+#define DARKGRAY 0x07
 #define VGA_BUFF_START 0xB8000
 #define VGA_BUFF_END 0xB8FA0
 
 int kprint(const char *string);
+int kprint_yx(const char *string, int y, int x);
 void screen_clear(void);
 void screen_paint(int);
 
 void main(void){
 
-
   /* lets cause a vault */
-	
+	int FLAG = 0;
+	if (FLAG == 1){
 	int b = 0;
 	int a = 9 / b;
+	}
 
 
 	screen_clear();
@@ -28,8 +31,9 @@ void main(void){
 }
 
 int kprint(const char *string){
+	/*
 	char n = 0;
-	char color = 0x07;
+	char color = DARKGRAY;
 	volatile char *video = (volatile char*)0xB8000;
 
 	while (*string != 0){
@@ -38,20 +42,26 @@ int kprint(const char *string){
 		n++;
 	}
 	return n;
+	*/
+	int x = 0;
+	int y = 0;
+	int n = kprint_yx(string, y, x);
+	return n;
 }
 
 int kprint_yx(const char *string, int y, int x){
-	/*  x => start char
-	 *  y => start line
-	 */
+	/*  x => start char; y => start line */
 
-	char color = 0x07;
+	int n = 0;
+	char color = DARKGRAY;
 	int offset = (x + y * 80) * 2;
 	volatile char *video = (volatile char*)0xB8000 + offset;
 	while ( *string != 0){
+		n++;
 		*video++ = *string++;
 		*video++ = color;
 	}
+	return n;
 }
 
 void screen_clear(void){
