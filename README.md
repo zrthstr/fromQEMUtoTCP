@@ -69,12 +69,16 @@ reading:
 make propper linker script
 load 32 bit kernel as elf
 print msg via VGA from c
-
-
 reading:
 * https://wiki.osdev.org/Printing_To_Screen
 * https://wiki.osdev.org/Detecting_Colour_and_Monochrome_Monitors
 
+## v6-tbd
+* lets craft a IDT
+* and trigger a fault
+* and marvel at out blue screen
+reading:
+https://wiki.osdev.org/Interrupt_Descriptor_Table
 
 ## TBD
 * paging
