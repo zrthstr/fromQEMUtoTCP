@@ -24,6 +24,7 @@ unsigned int cpu_lm_bit(void);
 int cpu_chk_interups(void);
 int get_cr0(void);
 void int_to_bin_str(int, char *);
+void int_to_hex_str(int, char *);
 
 void main(void){
 
@@ -74,7 +75,7 @@ void main(void){
 	char cr0_str[33];
 	int_to_bin_str(cr0, cr0_str);
 
-	kprint_yx("13 dec -> ", POS++, 0, D);
+	kprint_yx("cr0 -> ", POS++, 0, D);
 	kprint_yx(cr0_str, POS++, 0, D);
 
 
@@ -82,8 +83,10 @@ void main(void){
 	kprint_yx("setting up paging", POS++, 0, D);
 	set_up_paging();
 
+	int iiiii  = 0;
 	for(;;){
-		kprint_yx(".", POS++, 0, D);
+		//kprint_yx(".", POS++, 0, D);
+		iiiii --;
 	}
 }
 
@@ -101,8 +104,16 @@ void int_to_bin_str(int n, char * str){
 	}
 };
 
-
-
+void int_to_hex_str(int n, char * str){
+	char map[] = "0123456789abcdef";
+	int mask = 0b1111;
+	int i = 0;
+	for (; i < 8; i++){
+		int ix = ( n >> ((7 - i) * 4) ) & mask;
+		str[i] = map[ix];
+	}
+	str[i] = '\0'; 
+};
 
 int cpu_chk_interups(void){
 	unsigned int flags;
@@ -141,8 +152,36 @@ unsigned int cpu_lm_bit(void){
 	return mode;
 }
 
-
 void set_up_paging(){
+// https://github.com/starsheriff/train-os/tree/master/06-switch-to-long-mode
+
+/*
+	; Step 2: Enable Physical Address Extension
+	mov eax, cr4
+	or eax, (1 << 5)
+	mov cr4, eax
+*/
+	__asm__ volatile (
+		"mov eax, cr4 \n"
+		"or eax, (1 << 5 ) \n"
+		"mov cr4, eax \n");
+
+
+	//uint8_t * buffer = (uint8_t *) 0x10000;
+	volatile int *buffer = (volatile int*)0x10000;
+
+	buffer[0] = 0xffff;
+	buffer[0x4001] = 0xff;
+
+	char foo [33];
+	char bar [33];
+	int_to_bin_str(buffer, foo);
+	int_to_hex_str(buffer, bar);
+	kprint_yx(foo, 21,10, D);
+	kprint_yx(bar, 22,10, D);
+}
+
+void set_up_paging_copy_new_finaldotexedotdoceleven(){
 
 	
 	///// https://wiki.osdev.org/Setting_Up_Long_Mode
