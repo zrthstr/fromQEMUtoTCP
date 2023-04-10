@@ -18,18 +18,21 @@ void screen_clear(void);
 void screen_paint(int);
 void set_up_paging(void);
 //void cpuid(void);
-const char * const cpuid();
+void cpu_id(const char *cpuname);
+int cpu_lm_bit(void);
 
 void main(void){
 
   /* lets cause a vault */
 	int FLAG = 0;
 	if (FLAG == 1){
-	int b = 0;
-	int a = 9 / b;
+		int b = 0;
+		int a = 9 / b;
 	}
+	int POS = 1; // keep track of lines printed
+	char cpuname[16];
+	int lm_bit;
 
-  int POS = 1;
 
 	screen_clear();
 	kprint("screen cleared..\n");
@@ -39,10 +42,22 @@ void main(void){
 	kprint_yx(test,POS ++,0,D);
 	screen_paint(GREEN);
 
+	// check some assumtions about the cpu
+	// this assumes CPUID is avilable ont he current platform
 	kprint_yx("lets read CPUID..", POS++, 0, D);
-	char * cpuidbtr = cpuid();
+	cpu_id(cpuname);
+	kprint_yx(cpuname, POS++, 0, LIGHTBLUE);
 
-	kprint_yx(cpuidbtr, POS++, 0, LIGHTBLUE);
+	kprint_yx("lets check CPUID for long mode support", POS++, 0, D);
+	lm_bit = cpu_lm_bit();
+	if (lm_bit == 1 << 29){
+		kprint_yx("cool", POS++, 0, BLUE);
+		// ok, we can procede
+	} else {
+		kprint_yx("non_cool", POS++, 0, BLUE);
+		// we should die..
+	}
+
 
 	kprint_yx("starting transition to 64bit long mode     \n",POS++,0, D);
 	kprint_yx("setting up paging", POS++, 0, D);
@@ -53,25 +68,38 @@ void main(void){
 	}
 }
 
-//void cpuid(){
 
-	static inline int cpuid_string(int code, int where[4]) {
-  __asm__ volatile ("cpuid":"=a"(*where),"=b"(*(where+0)),
-               "=d"(*(where+1)),"=c"(*(where+2)):"a"(code));
-  return (int)where[0];
+static inline int cpuid_string(int code, int where[4]) {
+	__asm__ volatile (
+		"cpuid"
+		:"=a"(*where),"=b"(*(where+0)),"=d"(*(where+1)),"=c"(*(where+2))
+		:"a"(code));
+	return (int)where[0];
 }
 
-const char * const cpuid() {
-//void cpuid() {
-	static char s[16] = "BogusProces!";
-	cpuid_string(0, (int*)(s));
-	return s;
+cpu_id(const char * cpuname) {
+	// get the cpu vendor given name
+	cpuid_string(0, (int*)(cpuname));
 }
 
-//}
+int cpu_lm_bit(void){
+	// in asm we would want to do sth like this
+	//    mov eax, 0x80000001    ; Set the A-register to 0x80000001.
+	//    cpuid                  ; CPU identification.
+	//    test edx, 1 << 29      ; Test if the LM-bit, which is bit 29, is set in the D-register.
+	//    jz .NoLongMode         ; They aren't, there is no long mode.
+
+  int mode;
+	__asm__ volatile(
+		"mov eax, 0x80000001 \n"
+		"cpuid "
+		:"=d"(mode));
+
+	return mode;
+}
+
 
 void set_up_paging(){
-
 	///// https://wiki.osdev.org/Setting_Up_Long_Mode
 
 	/* 
@@ -132,7 +160,7 @@ These bits indicate that the page is present, readable & writable
 	// is this off by one? and would this matter?
 	while (ecx > 0){
 	//mov DWORD [edi], ebx         ; Set the uint32_t at the destination index to the B-register.
-  buffer[edi] = ebx; // ??
+	buffer[edi] = ebx; // ??
 	ebx += 0x1000;
 	edi += 8;
 	ecx--;
