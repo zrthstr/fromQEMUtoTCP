@@ -21,6 +21,9 @@ void set_up_paging(void);
 //void cpuid(void);
 void cpu_id(const char *cpuname);
 unsigned int cpu_lm_bit(void);
+int cpu_chk_interups(void);
+int get_cr0(void);
+void int_to_bin_str(int, char *);
 
 void main(void){
 
@@ -33,7 +36,6 @@ void main(void){
 	int POS = 1; // keep track of lines printed
 	char cpuname[16];
 	unsigned int lm_bit;
-
 
 	screen_clear();
 	kprint("screen cleared..\n");
@@ -59,6 +61,22 @@ void main(void){
 		// we should die..
 	}
 
+	
+	kprint_yx("check if interups are enabled..  \n",POS++,0, D);
+	int interupts_enabled = cpu_chk_interups();
+	if (interupts_enabled){
+		kprint_yx("interupts enbaled", POS++, 0, D);
+	} else {
+		kprint_yx("interupts DISabled", POS++, 0, D);
+	}
+
+	int cr0 = get_cr0();
+	char cr0_str[33];
+	int_to_bin_str(cr0, cr0_str);
+
+	kprint_yx("13 dec -> ", POS++, 0, D);
+	kprint_yx(cr0_str, POS++, 0, D);
+
 
 	kprint_yx("starting transition to 64bit long mode     \n",POS++,0, D);
 	kprint_yx("setting up paging", POS++, 0, D);
@@ -67,6 +85,31 @@ void main(void){
 	for(;;){
 		kprint_yx(".", POS++, 0, D);
 	}
+}
+
+int get_cr0(){
+	int cr0;
+	__asm__ volatile(
+		"mov cr0, eax":"=a"(cr0));
+	return cr0;
+};
+
+
+void int_to_bin_str(int n, char * str){
+	for (int i = 0; i < 32; i++){
+		str[i] = ((n >> (31 - i)) & 1 ) + '0';
+	}
+};
+
+
+
+
+int cpu_chk_interups(void){
+	unsigned int flags;
+	__asm__ volatile ("pushf\n"
+		"pop eax"
+		:"=a"(flags));
+	return flags & (1 << 9);
 }
 
 cpu_id(const char * cpuname) {
@@ -95,12 +138,13 @@ unsigned int cpu_lm_bit(void){
 		"mov eax, 0x80000001 \n"
 		"cpuid "
 		:"=d"(mode));
-	//return 536870912;
 	return mode;
 }
 
 
 void set_up_paging(){
+
+	
 	///// https://wiki.osdev.org/Setting_Up_Long_Mode
 
 	/* 
