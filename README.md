@@ -16,6 +16,7 @@ General reading:
 * https://wiki.osdev.org/Exceptions#General_Protection_Fault
 * https://github.com/thomasloven/mittos64/tree/master/doc
 * https://github.com/tuhdo/os01/blob/master/Operating_Systems_From_0_to_1.pdf
+* https://github.com/0xAX/linux-insides/blob/master/SUMMARY.md
 
 Why does the MBR go to `x07c00`? -> https://www.glamenv-septzen.net/en/view/6
 
@@ -74,12 +75,24 @@ reading:
 * https://wiki.osdev.org/Detecting_Colour_and_Monochrome_Monitors
 
 ## v6-tbd
-* lets craft a IDT
-* and trigger a fault
-* and marvel at out blue screen
+* learn to read from a FS  ?
+* switch to long mode / 64 bit?
+
+* lets craft a IDT ?
+* and trigger a fault ?
+* and marvel at out blue screen ?
 reading:
-https://wiki.osdev.org/Interrupt_Descriptor_Table
+* https://wiki.osdev.org/Setting_Up_Long_Mode
+* https://wiki.osdev.org/Interrupt_Descriptor_Table
 
 ## TBD
 * paging
 * 64bit longmode
+* read from fs?
+* IDT
+* write a rudimentary kernel
+* get to ring 3
+* userland
+* probe hardware
+* init network card
+* write network stack

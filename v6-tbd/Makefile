@@ -4,7 +4,7 @@ KERNEL=kernel.elf
 #CC = gcc
 CC = i686-elf-gcc
 
-CSTYLE = -Wall -Wextra -std=c89 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
+CSTYLE = -Wall -Wextra -std=c11 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
 ASMTYPE = -masm=intel
 CFLAG = -ffreestanding -mno-red-zone -O0 -mno-sse -mno-sse2 $(CSTYLE) $(ASMTYPE)
 LDFLAG = -nostdlib -lgcc
