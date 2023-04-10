@@ -4,6 +4,7 @@
 
 #define BLACK 0x00
 #define BLUE 0x01
+#define RED 0x4
 #define LIGHTBLUE 0x09
 #define GREEN 0x0A
 #define DARKGRAY 0x07
@@ -19,7 +20,7 @@ void screen_paint(int);
 void set_up_paging(void);
 //void cpuid(void);
 void cpu_id(const char *cpuname);
-int cpu_lm_bit(void);
+unsigned int cpu_lm_bit(void);
 
 void main(void){
 
@@ -31,7 +32,7 @@ void main(void){
 	}
 	int POS = 1; // keep track of lines printed
 	char cpuname[16];
-	int lm_bit;
+	unsigned int lm_bit;
 
 
 	screen_clear();
@@ -50,11 +51,11 @@ void main(void){
 
 	kprint_yx("lets check CPUID for long mode support", POS++, 0, D);
 	lm_bit = cpu_lm_bit();
-	if (lm_bit == 1 << 29){
-		kprint_yx("cool", POS++, 0, BLUE);
+	if (lm_bit & (1 << 29)) {
+		kprint_yx("cool: long_mode supported", POS++, 0, BLUE);
 		// ok, we can procede
 	} else {
-		kprint_yx("non_cool", POS++, 0, BLUE);
+		kprint_yx("non_cool: long mode NOT supported", POS++, 0, RED);
 		// we should die..
 	}
 
@@ -68,8 +69,13 @@ void main(void){
 	}
 }
 
+cpu_id(const char * cpuname) {
+	// get the cpu vendor given name
+	//cpuid_string(0, (int*)(cpuname));
 
-static inline int cpuid_string(int code, int where[4]) {
+	int code = 0; /// magic number, CPUI function
+	int * where = cpuname;
+
 	__asm__ volatile (
 		"cpuid"
 		:"=a"(*where),"=b"(*(where+0)),"=d"(*(where+1)),"=c"(*(where+2))
@@ -77,24 +83,19 @@ static inline int cpuid_string(int code, int where[4]) {
 	return (int)where[0];
 }
 
-cpu_id(const char * cpuname) {
-	// get the cpu vendor given name
-	cpuid_string(0, (int*)(cpuname));
-}
-
-int cpu_lm_bit(void){
+unsigned int cpu_lm_bit(void){
 	// in asm we would want to do sth like this
 	//    mov eax, 0x80000001    ; Set the A-register to 0x80000001.
 	//    cpuid                  ; CPU identification.
 	//    test edx, 1 << 29      ; Test if the LM-bit, which is bit 29, is set in the D-register.
 	//    jz .NoLongMode         ; They aren't, there is no long mode.
 
-  int mode;
+	unsigned int mode;
 	__asm__ volatile(
 		"mov eax, 0x80000001 \n"
 		"cpuid "
 		:"=d"(mode));
-
+	//return 536870912;
 	return mode;
 }
 

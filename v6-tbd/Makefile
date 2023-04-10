@@ -88,6 +88,9 @@ bochs:
 run:
 	qemu-system-x86_64 -no-reboot -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE) -monitor stdio  -d cpu_reset,int,guest_errors
 
+run_32:
+	qemu-system-i386 -no-reboot -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE) -monitor stdio  -d cpu_reset,int,guest_errors
+
 
 ###########
 ### GDB ###
