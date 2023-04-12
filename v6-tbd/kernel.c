@@ -5,13 +5,19 @@
 #define BLACK 0x00
 #define BLUE 0x01
 #define RED 0x4
+#define DARKGRAY 0x07
 #define LIGHTBLUE 0x09
 #define GREEN 0x0A
-#define DARKGRAY 0x07
+#define LIGHTCYAN 0x0B
 #define VGA_BUFF_START 0xB8000
 #define VGA_BUFF_END 0xB8FA0
+#define YELLOW 0x0E
 
 #define D DARKGRAY
+
+#define print(x); kprint_yx(x, POS++, 0, D);
+#define cprint(x, y); kprint_yx(x, POS++, 0, y);
+
 
 int kprint(const char *string);
 int kprint_yx(const char *string, int y, int x, char color);
@@ -40,48 +46,52 @@ void main(void){
 
 	screen_clear();
 	kprint("screen cleared..\n");
-	kprint_yx("arrived in 32 bit protected mode           \n",POS++,0, D);
-	kprint_yx("testing stack... seems to work             \n",POS++,0, D);
+	print("print111");
+	print("print222");
+	print("arrived in 32 bit protected mode           \n");
+	print("testing stack... seems to work             \n");
 	char test[] = "testing data section, seems to work    \n";
-	kprint_yx(test,POS ++,0,D);
+	print(test);
 	screen_paint(GREEN);
 
 	// check some assumtions about the cpu
 	// this assumes CPUID is avilable ont he current platform
-	kprint_yx("lets read CPUID..", POS++, 0, D);
+	print("lets read CPUID..");
 	cpu_id(cpuname);
-	kprint_yx(cpuname, POS++, 0, LIGHTBLUE);
+	cprint(cpuname, LIGHTBLUE);
 
-	kprint_yx("lets check CPUID for long mode support", POS++, 0, D);
+	print("lets check CPUID for long mode support");
 	lm_bit = cpu_lm_bit();
 	if (lm_bit & (1 << 29)) {
-		kprint_yx("cool: long_mode supported", POS++, 0, BLUE);
+		cprint("cool: long_mode supported", BLUE);
 		// ok, we can procede
 	} else {
-		kprint_yx("non_cool: long mode NOT supported", POS++, 0, RED);
+		cprint("non_cool: long mode NOT supported", RED);
 		// we should die..
 	}
 
 	
-	kprint_yx("check if interups are enabled..  \n",POS++,0, D);
+	print("check if interups are enabled..  \n");
 	int interupts_enabled = cpu_chk_interups();
 	if (interupts_enabled){
-		kprint_yx("interupts enbaled", POS++, 0, D);
+		print("interupts enbaled");
 	} else {
-		kprint_yx("interupts DISabled", POS++, 0, D);
+		print("interupts DISabled");
 	}
 
 	int cr0 = get_cr0();
 	char cr0_str[33];
 	int_to_bin_str(cr0, cr0_str);
 
-	kprint_yx("cr0 -> ", POS++, 0, D);
-	kprint_yx(cr0_str, POS++, 0, D);
+	print("cr0 -> ");
+	print(cr0_str);
 
 
-	kprint_yx("starting transition to 64bit long mode     \n",POS++,0, D);
-	kprint_yx("setting up paging", POS++, 0, D);
+	print("starting transition to 64bit long mode     \n");
+	print("setting up paging");
 	set_up_paging();
+
+	cprint("apparently we are in long mode.... AND PAGING", YELLOW);
 
 	int iiiii  = 0;
 	for(;;){
@@ -161,6 +171,7 @@ void set_up_paging(){
 	or eax, (1 << 5)
 	mov cr4, eax
 */
+  /// tested, woks.. (creg -> CR4=0x00000020)
 	__asm__ volatile (
 		"mov eax, cr4 \n"
 		"or eax, (1 << 5 ) \n"
@@ -168,17 +179,146 @@ void set_up_paging(){
 
 
 	//uint8_t * buffer = (uint8_t *) 0x10000;
-	volatile int *buffer = (volatile int*)0x10000;
+	//char *buffer = (char*)0x10000;
+	
+	// this must align to 4096
+	uint8_t *buffer = (uint8_t*)0x10000;
 
-	buffer[0] = 0xffff;
-	buffer[0x4001] = 0xff;
+	/// TODO: lets null this just to be sure
+	uint32_t buffer_len = 4096 * 3;
+	for (int i = 0; i < buffer_len; i ++){
+		buffer[i] = 0x00;
+	}
 
-	char foo [33];
-	char bar [33];
-	int_to_bin_str(buffer, foo);
-	int_to_hex_str(buffer, bar);
-	kprint_yx(foo, 21,10, D);
-	kprint_yx(bar, 22,10, D);
+	uint8_t *p4_table = (uint8_t*) 0x10000;
+	uint8_t *p3_table = (uint8_t*) 0x11000;
+	uint8_t *p2_table = (uint8_t*) 0x12000;
+
+	/*
+	*	; Step 3: Set `cr3` register
+	*	mov eax, p4_table
+	*	mov cr3, eax
+	*/
+	// -> CR3=0x000000010000
+	int cr3 = p4_table;
+	__asm__ volatile (
+		"mov eax, %0  \n"
+		"mov cr3, eax \n"
+		: : "r"(cr3));
+
+	//PDE_PRESENT  equ 1 << 0
+	//PDE_WRITABLE equ 1 << 1
+	//PDE_LARGE    equ 1 << 7
+
+    //  mov eax, (0x20_0000 | PDE_PRESENT | PDE_WRITABLE | PDE_LARGE)
+	//  mov [p2_table + 8], eax
+
+	uint32_t PDE_PRESENT = 1 << 0;
+	uint32_t PDE_WRITABLE = 1 << 1;
+	uint32_t PDE_LARGE = 1 << 7;
+
+	uint32_t v_block_0 = 0x000000;
+	uint32_t v_block_1 = 0x200000;
+	uint32_t p2_table_mask_1 = (v_block_1 | PDE_PRESENT | PDE_WRITABLE | PDE_LARGE);
+
+	// 0x0000000000012000 <bogus+       0>:	0x00000000	0x00000000	0x00200083
+	// -> '0b1000000000000010000011'
+	__asm__ volatile (
+		"mov eax, %0\n"
+		"mov [%1 + 8], eax\n"
+		:
+		:"r"(p2_table_mask_1), "r"(p2_table)
+		:"eax");
+
+	uint32_t p2_table_mask_0 = (v_block_0 | PDE_PRESENT | PDE_WRITABLE | PDE_LARGE);
+	__asm__ volatile (
+		"mov eax, %0\n"
+		"mov [%1], eax\n"
+		:
+		:"r"(p2_table_mask_0), "r"(p2_table)
+		:"eax");
+
+	//; Step 5: Set the 0th entry of p3 to point to our p2 table
+	//mov eax, p2_table ; load the address of the p2 table
+	//or eax, (PDE_PRESENT | PDE_WRITABLE)
+	//mov [p3_table], eax
+
+	uint32_t p3_0 = ( (uint32_t)  p2_table | PDE_PRESENT | PDE_WRITABLE);
+	__asm__ volatile (
+		"mov eax, %0\n"
+		"mov [%1], eax\n"
+		::"p"(p3_0), "p"(p3_table));
+
+
+	//; Step 6: Set the 0th entry of p4 to point to our p3 table
+	//mov eax, p3_table
+	//or eax, (PDE_PRESENT | PDE_WRITABLE)
+	//mov [p4_table], eax
+
+	uint32_t p4_0 = ((uint32_t) p3_table | PDE_PRESENT | PDE_WRITABLE);
+	__asm__ volatile (
+		"mov eax, %0\n"
+		"mov [%1], eax\n"
+		::"p"(p4_0), "p"(p4_table));
+
+
+	// ; Step 7: Set EFER.LME to 1 to enable the long mode
+	// mov ecx, 0xC0000080
+	// rdmsr
+	// or  eax, 1 << 8
+	// wrmsr
+
+	__asm__ volatile (
+		"mov ecx, 0xC0000080 \n"
+		"rdmsr \n"
+		"or eax, 1 << 8 \n"
+		"wrmsr \n"
+		);
+
+
+	// ; Step 8: enable paging
+	// mov eax, cr0
+	// or eax, 1 << 31
+	// mov cr0, eax
+	
+	__asm__ volatile (
+		"mov eax, cr0 \n"
+		"or eax, 1 << 31 \n"
+		"mov cr0, eax "
+		);
+
+
+	//lgdt [gdt64.pointer]
+	//jmp gdt64.code:longstart
+	//
+	//gdt64:
+	//    dq 0
+	//.code: equ $ - gdt64
+	//    dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)
+	//.pointer:
+	//    dw $ - gdt64 - 1 ; length of the gdt64 table
+	//    dq gdt64         ; addess of the gdt64 table
+	//
+
+	// 3x dq + dw 
+	// dq -> 8 byte
+	// dw -> 2 bytes
+	// => 26?!?
+	
+	uint64_t mask = (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53);
+	uint8_t *gdt64 = (uint8_t *) 0x500;
+	//gdt64[8] = mask; // WWONT ORK
+	uint64_t gdt64_8 = (uint64_t *) 0x508;
+	gdt64_8 = mask;
+
+	gdt64[16] = 26 // words??
+	gdt64[16] = 52 // bytes??
+	
+
+	ONLY THIS LEFT
+	/// ▷⋅⋅⋅//    dq gdt64         ; addess of the gdt64 table 
+	gdt64_8[]... 
+
 }
 
 void set_up_paging_copy_new_finaldotexedotdoceleven(){
