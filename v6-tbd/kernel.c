@@ -25,13 +25,14 @@ void screen_clear(void);
 void screen_paint(int);
 void set_up_paging(void);
 //void cpuid(void);
-int cpu_id(const char *cpuname);
+void cpu_id(const char *cpuname);
 unsigned int cpu_lm_bit(void);
 int cpu_chk_interups(void);
 int get_cr0(void);
 void int_to_bin_str(int, char *);
 void int_to_hex_str(int, char *);
 void write_gdt64(void);
+void write_mini_64bit_kernel(void);
 
 
 void main(void){
@@ -102,7 +103,7 @@ void main(void){
 	}
 }
 
-int get_cr0(){
+int get_cr0(void){
 	int cr0;
 	__asm__ volatile(
 		"mov cr0, eax":"=a"(cr0));
@@ -135,18 +136,19 @@ int cpu_chk_interups(void){
 	return flags & (1 << 9);
 }
 
-int cpu_id(const char * cpuname) {
+void cpu_id(const char * cpuname) {
 	// get the cpu vendor given name
 	//cpuid_string(0, (int*)(cpuname));
 
 	int code = 0; /// magic number, CPUI function
-	int * where = cpuname;
+	int * where = (int *) cpuname;
 
 	__asm__ volatile (
 		"cpuid"
 		:"=a"(*where),"=b"(*(where+0)),"=d"(*(where+1)),"=c"(*(where+2))
 		:"a"(code));
-	return (int)where[0];
+	//return (int)where[0];
+	//return * where;
 }
 
 unsigned int cpu_lm_bit(void){
@@ -164,7 +166,7 @@ unsigned int cpu_lm_bit(void){
 	return mode;
 }
 
-void write_gdt64(){
+void write_gdt64(void){
 
 	/// lets stuff the gtd64 intto 0x500
 
@@ -235,7 +237,7 @@ void write_gdt64(){
 	
 }
 
-void write_mini_64bit_kernel(){
+void write_mini_64bit_kernel(void){
 	// 0x00007E00
 	uint8_t *buffer = (uint8_t*)0x7E00;
 
@@ -270,7 +272,7 @@ void write_mini_64bit_kernel(){
 	*buffer++ = 0xf4 ;
 }
 
-void set_up_paging(){
+void set_up_paging(void){
 // https://github.com/starsheriff/train-os/tree/master/06-switch-to-long-mode
 	write_mini_64bit_kernel();
 	write_gdt64(); // to 0x500
@@ -293,13 +295,13 @@ void set_up_paging(){
 
 	// lets null this just to be sure
 	uint32_t buffer_len = 4096 * 3;
-	for (int i = 0; i < buffer_len; i ++){
+	for (uint32_t i = 0; i < buffer_len; i ++){
 		buffer[i] = 0x00;
 	}
 
 	// lets also null this
-	uint32_t * gbuffer = 0x500;
-	for (int i = 0; i < 100; i ++){
+	uint32_t * gbuffer = (uint32_t *) 0x500;
+	for (uint32_t i = 0; i < 100; i ++){
 		gbuffer[i] = 0x00;
 	}
 
