@@ -74,18 +74,17 @@ reading:
 * https://wiki.osdev.org/Printing_To_Screen
 * https://wiki.osdev.org/Detecting_Colour_and_Monochrome_Monitors
 
-## v6-tbd
-* learn to read from a FS  ?
+## v6-longmode
+decided to move the longmode code into the mbr. So them MBR boots from real mode to protected mode to long mode, then jumps into the kernel that was loaded from disk
 * switch to long mode / 64 bit?
-
-* lets craft a IDT ?
-* and trigger a fault ?
-* and marvel at out blue screen ?
 reading:
 * https://wiki.osdev.org/Setting_Up_Long_Mode
 * https://wiki.osdev.org/Interrupt_Descriptor_Table
 
 ## TBD
+* and marvel at out blue screen ?
+* learn to read from a FS  ?
+* and trigger a fault ?
 * paging
 * 64bit longmode
 * read from fs?
