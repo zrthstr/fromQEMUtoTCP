@@ -183,8 +183,6 @@ foooo:
 
     lgdt [gdt64.pointer]
     jmp gdt64.code:longstart
-   
-
 
 
 section .text
@@ -199,7 +197,6 @@ longstart:
     jmp 0x600
     hlt
 
-    
 section .bss
 ; must be page aligned
 align 4096

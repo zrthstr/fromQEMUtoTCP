@@ -140,15 +140,13 @@ void cpu_id(const char * cpuname) {
 	// get the cpu vendor given name
 	//cpuid_string(0, (int*)(cpuname));
 
-	int code = 0; /// magic number, CPUI function
+	int code = 0; /// magic number, CPU function
 	int * where = (int *) cpuname;
 
 	__asm__ volatile (
 		"cpuid"
 		:"=a"(*where),"=b"(*(where+0)),"=d"(*(where+1)),"=c"(*(where+2))
 		:"a"(code));
-	//return (int)where[0];
-	//return * where;
 }
 
 unsigned int cpu_lm_bit(void){
@@ -186,12 +184,41 @@ void write_gdt64(void){
 	// dq -> 8 byte
 	// dw -> 2 bytes
 	// => 26?!?
-	
-	// uint64_t mask = (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53);
-	uint8_t *gdt64 = (uint8_t *) 0x500;
-	//gdt64[8] = mask; // WWONT ORK
-	//uint64_t *gdt64_8 = (uint64_t *) 0x508;
 
+
+	// 0x00 * 8
+	// or 0x0000000000000000
+	//
+	// 0b1000000000000000000000000000000000000010000100100000000000000000
+	// or 0x8000100804000000
+	//
+	// 15 or 17 //  gpt is unsure
+	// or 0x0000000f or  0x00000011
+	//
+	// 0x0000 0000 0000 0500
+
+	// lets null this
+	uint32_t * gbuffer = (uint32_t *) 0x500;
+	for (uint32_t i = 0; i < 32; i ++){
+		gbuffer[i] = 0x00;
+	}
+
+	uint32_t *gdt64 = (uint32_t *) 0x500;
+
+	*(gdt64 + 0 ) =  1 ;
+	*(gdt64 + 1 ) =  1 ;
+
+	/*
+	*(gdt64 + 0 ) =  0 ;
+	*(gdt64 + 1 ) =  0 ;
+	*(gdt64 + 2 ) =  0x80001008 ;
+	*(gdt64 + 3 ) =  0x04000000 ;
+	*(gdt64 + 4 ) =  0x0000000f ; // should also try 0x11
+	*(gdt64 + 5 ) =  0 ;
+	*(gdt64 + 6 ) =  0x00000500 ;
+	*/
+/*
+	uint8_t *gdt64 = (uint8_t *) 0x500;
 
 	*gdt64++ = 0x00;
 	*gdt64++ = 0x00;
@@ -222,19 +249,8 @@ void write_gdt64(void){
 	*gdt64++ = 0x00;
 	*gdt64++ = 0x00;
 	*gdt64++ = 0x00;
+*/
 
-	// 0x500 - 0x507 |  00 00 00 00 00 00 00 00  ; gdt64: dq 0
-	// 0x508 - 0x50F |  66 0F 01 0D FB 02 00 00  ; .pointer: dw $ - gdt64 - 1 ; length of the gdt64 table
-	// 0x510 - 0x517 |  48 8D 1D F4 02 00 00     ;          dq gdt64         ; address of the gdt64 table
-
-	//gdt64[16] = 26; // words??
-	//gdt64[16] = 52; // bytes!?!?
-	
-
-	/// ▷⋅⋅⋅//    dq gdt64         ; addess of the gdt64 table 
-	//gdt64[17] = "0x5";
-	//gdt64[18] = 0x0;
-	
 }
 
 void write_mini_64bit_kernel(void){
@@ -299,11 +315,6 @@ void set_up_paging(void){
 		buffer[i] = 0x00;
 	}
 
-	// lets also null this
-	uint32_t * gbuffer = (uint32_t *) 0x500;
-	for (uint32_t i = 0; i < 100; i ++){
-		gbuffer[i] = 0x00;
-	}
 
 
 	// out page tables. 4096 byte each..

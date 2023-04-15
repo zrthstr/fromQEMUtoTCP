@@ -74,7 +74,10 @@ reading:
 * https://wiki.osdev.org/Printing_To_Screen
 * https://wiki.osdev.org/Detecting_Colour_and_Monochrome_Monitors
 
-## v6-longmode
+## v6-failed-longmode
+a failed attempt to switch to longmode from c...
+
+## v7-longmode
 decided to move the longmode code into the mbr. So them MBR boots from real mode to protected mode to long mode, then jumps into the kernel that was loaded from disk
 * switch to long mode / 64 bit?
 reading:
