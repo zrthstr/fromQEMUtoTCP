@@ -11,12 +11,15 @@ Building a simple OS for fun - trying to better understand things along the way 
 
 General reading:
 * osdev-wiki
+* Operating Systems: Three Easy Pieces (https://www.youtube.com/playlist?list=PLRJWiLCmxyxi2RCPVYfewxJIWJzc_colw)
 * https://www.cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
 * https://wiki.osdev.org/Rolling_Your_Own_Bootloader
 * https://wiki.osdev.org/Exceptions#General_Protection_Fault
 * https://github.com/thomasloven/mittos64/tree/master/doc
 * https://github.com/tuhdo/os01/blob/master/Operating_Systems_From_0_to_1.pdf
 * https://github.com/0xAX/linux-insides/blob/master/SUMMARY.md
+* https://github.com/starsheriff/train-os/tree/master/06-switch-to-long-mode
+
 
 Why does the MBR go to `x07c00`? -> https://www.glamenv-septzen.net/en/view/6
 
@@ -83,6 +86,22 @@ decided to move the longmode code into the mbr. So them MBR boots from real mode
 reading:
 * https://wiki.osdev.org/Setting_Up_Long_Mode
 * https://wiki.osdev.org/Interrupt_Descriptor_Table
+we id map two 2mb pages..
+
+## v8-kernellib
+* add malloc
+* cleanup things
+* restructure things so they are nicly tucked away in a lib
+
+## v9-tbd
+https://wiki.osdev.org/Interrupt_Service_Routines
+* handle faults??
+* ISR ?? IDT ??
+( idt tells us where the ISRs are)
+The location of the IDT is kept in the IDTR (IDT register).
+
+see: https://github.com/szhou42/osdev 
+https://github.com/starsheriff/train-os/tree/master/10-interrupts
 
 ## TBD
 * and marvel at out blue screen ?

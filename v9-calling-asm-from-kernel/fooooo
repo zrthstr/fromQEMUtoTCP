@@ -1,0 +1,43 @@
+section .data
+    hello db 'Hello from GPT', 0
+
+section .text
+    global _start
+
+asm_from_c:
+    ; Set up VGA text mode
+    mov ax, 03h
+    int 10h
+
+    ; Print "Hello from GPT" to the screen
+    mov edi, 0xb8000   ; VGA text memory address
+    mov esi, hello     ; Address of hello string
+    mov ecx, 13        ; Length of hello string
+    cld                ; Clear direction flag for forward string copy
+    rep movsb          ; Copy string to VGA text memory
+
+    ; Exit program
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
+
+
+section .text
+    global _start
+
+_start:
+    ; Set up VGA text mode
+    mov ax, 03h
+    int 10h
+
+    ; Print "Hello from GPT" to the screen
+    mov edi, 0xb8000   ; VGA text memory address
+    mov eax, 0x47616c6f6d6f6820 ; "GPT from aloH" in little-endian
+    mov ebx, 0x6572206f6c6c6548 ; "Hello er"
+    mov [edi], eax
+    mov [edi+4], ebx
+
+    ; Exit program
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80

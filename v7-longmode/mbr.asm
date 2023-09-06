@@ -25,8 +25,7 @@
 PrintSt:
   lodsb
   or al, al                   ; logical or AL by itself
-  jz retPrint                  ; if the result is zero, get out
-  ;ret
+  jz retPrint                 ; if the result is zero, get out
   mov ah, 0x0E
   int 0x10                    ; otherwise, print out the character!
   jmp 0:PrintSt
@@ -64,12 +63,6 @@ init_pm:
   mov gs, ax
   mov ebp, 0x90000 ; Update our stack position so it is right
   mov esp, ebp ; at the top of the free space.
-
-
-  ;mov eax, 0xb8000
-  ;;mov ebx, 0x07690748
-  ;mov  [0xb8000], 0x07690748
-  ;mov  [eax], ebx
 
   mov ebx, MSG_PROT_MODE
   mov ecx, 2 * 21 * 80
@@ -115,7 +108,6 @@ d_lba:
 
 bits 32
 
-;
 PTE_PRESENT equ 1 << 7
 
 ; Flags for _large_ p2 aka. PDE page table entries
@@ -173,14 +165,6 @@ foooo:
         or eax, 1 << 31
         mov cr0, eax
 
-        ; is paging enabled now?
-        ; -> No, this instruction still works
-        ;mov eax, [0xFF_FFFF]
-
-        ; Step 9: Disable Interrupts
-
-        ; Step 11: Enable Interrupts
-
     lgdt [gdt64.pointer]
     jmp gdt64.code:longstart
 
@@ -190,9 +174,6 @@ bits 64
 longstart:
     mov word [0xb8000], 0x0e4f ; 'O', yellow on black
     mov word [0xb8002], 0x0e4b ; 'K', yellow on black
-
-    ; uncomment the next line and you will have a page fault
-        ;mov eax, [0xFF_FFFF]
 
     jmp 0x600
     hlt
@@ -209,7 +190,7 @@ p2_table:
 stack_bottom:
         resb 64
 stack_top:
-    
+
 section .rodata
 gdt64:
         dq 0
