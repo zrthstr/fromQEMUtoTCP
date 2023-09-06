@@ -1,9 +1,19 @@
+### make things linux distri independant
+
+CC = x86_64-linux-gnu-gcc
+OBJDUMP = objdump
+
+ifeq ($(shell lsb_release -si),Debian)
+    CC = x86_64-linux-gnu-gcc-10
+    OBJDUMP = x86_64-linux-gnu-objdump
+endif
+
+
 DISK=disk.hdd
 KERNEL=kernel.elf
 
 #CC = gcc
 #CC = i686-elf-gcc
-CC = x86_64-linux-gnu-gcc
 
 CSTYLE = -Wall -Wextra -std=c11 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
 ASMTYPE = -masm=intel
@@ -69,7 +79,7 @@ MBR_BIN = mbr.bin
 
 translate_mbr:
 	nasm $(MBR_ASM) -o $(MBR_BIN)
-	objdump -D -b binary -mi386 -Maddr16,data16 $(MBR_BIN)
+	$(OBJDUMP) -D -b binary -mi386 -Maddr16,data16 $(MBR_BIN)
 
 
 translate_modules:
