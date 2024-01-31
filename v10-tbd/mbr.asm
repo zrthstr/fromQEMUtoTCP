@@ -164,7 +164,7 @@ longstart:
     mov word [0xb8000], 0x0e4f ; 'O', yellow on black
     mov word [0xb8002], 0x0e4b ; 'K', yellow on black
 
-    jmp 0x638
+    jmp 0x600
     hlt
 
 section .bss

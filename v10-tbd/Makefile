@@ -1,6 +1,8 @@
 ### make things linux distri independant
 
 CC = x86_64-linux-gnu-gcc
+#CC = gcc
+#CC = i686-elf-gcc
 OBJDUMP = objdump
 
 ifeq ($(shell lsb_release -si),Debian)
@@ -10,10 +12,8 @@ endif
 
 
 DISK=disk.hdd
-KERNEL=kernel.elf
+KERNEL=kernel.flat
 
-#CC = gcc
-#CC = i686-elf-gcc
 
 CSTYLE = -Wall -Wextra -std=c11 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
 ASMTYPE = -masm=intel
@@ -21,8 +21,6 @@ CFLAG = -ffreestanding -mno-red-zone -O0 -mno-sse -mno-sse2 $(CSTYLE) $(ASMTYPE)
 LDFLAG = -nostdlib -lgcc
 
 CCC = $(CC) $(CFLAG)
-
-
 
 
 ######################
@@ -63,7 +61,6 @@ image_write_mbr:
 	dd if=mbr.bin bs=1M count=64 of=$(DISK) conv=notrunc seek=0
 
 image_write_kernel:
-	@# we are cutting of the elf headder and the padding. not sure how to do this propperly via linker??
 	@# 1536 -> 0x600
 	###dd if=kernel.bin of=kernel.bin_cut bs=1536 skip=1
 	###mn kernel.bin_cut kernel.bin
@@ -86,9 +83,11 @@ translate_modules:
 	nasm -f elf64 idt.asm -o idt.o
 
 translate_kernel:
-	$(CCC) -T link.ld kernel.c lib/std.c idt.o -o kernel.bin -nostdlib -lgcc  -Wl,-no-pie
-	#$(CCC) -T link.ld kernel.c lib/std.c -o kernel.bin -nostdlib -lgcc  -Wl,-no-pie
-	objcopy -O binary kernel.bin kernel.flat
+	#$(CCC)  kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
+	#$(CCC)  -T link.ld kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
+	$(CCC) -T link.ld kernel.c lib/std.c -o kernel.elf -nostdlib -lgcc  -Wl,-no-pie
+	#ld -o kernel.elf -T link.ld kernel.o
+	objcopy -O binary kernel.elf kernel.flat
 
 
 	@#objdump -D -b binary -mi386 -Maddr16,data16 kernel.bin
@@ -106,6 +105,7 @@ Q_DRIVE = -drive file=$(DISK),media=disk,format=raw
 
 bochs:
 	bochs -qf /dev/null -rc /dev/null 'megs:2000' 'boot:disk' 'ata0-master: type=disk, path="disk.hdd", mode=flat' 'magic_break: enabled=1' 'cpu: reset_on_triple_fault=1'
+	###dd if=kernel.bin of=kernel.bin_cut bs=1536 skip=1
 
 run:
 	qemu-system-x86_64 -no-reboot -M q35 $(Q_RAM) $(Q_DEBUG) $(Q_DRIVE) -monitor stdio  -d cpu_reset,int,guest_errors

@@ -39,7 +39,7 @@ void main(void){
 
 	cprint("apparently we are in long mode.... AND PAGING", YELLOW);
 
-	init_heap();
+	//init_heap();
 
 	void * foo = malloc(1);
 	void * fooo = malloc(15);
@@ -59,7 +59,7 @@ void main(void){
 	//cause_page_problems();
 	for(;;){
 		//kprint_yx(".", POS++, 0, D);
-		iiiii --;
+//iiiii --;
 	}
 }
 
