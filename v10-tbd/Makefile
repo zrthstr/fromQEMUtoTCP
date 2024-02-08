@@ -83,10 +83,10 @@ translate_modules:
 	nasm -f elf64 idt.asm -o idt.o
 
 translate_kernel:
-	#$(CCC)  kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
-	#$(CCC)  -T link.ld kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
+	@#$(CCC)  kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
+	@#$(CCC)  -T link.ld kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
 	$(CCC) -T link.ld kernel.c lib/std.c -o kernel.elf -nostdlib -lgcc  -Wl,-no-pie
-	#ld -o kernel.elf -T link.ld kernel.o
+	@#ld -o kernel.elf -T link.ld kernel.o
 	objcopy -O binary kernel.elf kernel.flat
 
 
