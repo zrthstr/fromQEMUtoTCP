@@ -12,7 +12,7 @@ endif
 
 
 DISK=disk.hdd
-KERNEL=kernel.flat
+KERNEL=kernel.bin
 
 
 CSTYLE = -Wall -Wextra -std=c11 -pedantic -Wmissing-prototypes -Wstrict-prototypes -Wold-style-definition
@@ -55,7 +55,7 @@ image_read_mbr:
 	dd if=$(DISK) bs=1 count=446 | xxd
 
 image_read_kernel:
-	cat kernel.bin | xxd | grep -v '6690 6690 6690 6690 6690 6690 6690 6690' | grep -v '0000 0000 0000 0000 0000 0000 0000 0000'
+	cat $(KERNEL) | xxd | grep -v '6690 6690 6690 6690 6690 6690 6690 6690' | grep -v '0000 0000 0000 0000 0000 0000 0000 0000'
 
 image_write_mbr:
 	dd if=mbr.bin bs=1M count=64 of=$(DISK) conv=notrunc seek=0
@@ -64,7 +64,7 @@ image_write_kernel:
 	@# 1536 -> 0x600
 	###dd if=kernel.bin of=kernel.bin_cut bs=1536 skip=1
 	###mn kernel.bin_cut kernel.bin
-	dd if=kernel.flat of=$(DISK) bs=1M count=1 seek=1 conv=notrunc
+	dd if=$(KERNEL) of=$(DISK) bs=1M count=1 seek=1 conv=notrunc
 	#dd if=kernel.bin of=$(DISK) bs=1047040 count=1 seek=1 conv=notrunc
 
 ##################
@@ -79,21 +79,22 @@ translate_mbr:
 	$(OBJDUMP) -D -b binary -mi386 -Maddr16,data16 $(MBR_BIN)
 
 
-translate_modules:
-	nasm -f elf64 idt.asm -o idt.o
+#translate_modules:
+#	nasm -f elf64 idt.asm -o idt.o
 
 translate_kernel:
 	@#$(CCC)  kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
 	@#$(CCC)  -T link.ld kernel.c lib/std.c idt.o -o kernel.o -nostdlib -lgcc  -Wl,-no-pie
 	$(CCC) -T link.ld kernel.c lib/std.c -o kernel.elf -nostdlib -lgcc  -Wl,-no-pie
 	@#ld -o kernel.elf -T link.ld kernel.o
-	objcopy -O binary kernel.elf kernel.flat
+	objcopy -O binary kernel.elf $(KERNEL)
 
 
 	@#objdump -D -b binary -mi386 -Maddr16,data16 kernel.bin
 	#objdump -d kernel.bin -M intel,intel-mnemonic | grep -v 'xchg   ax,ax'
 
-translate: translate_mbr translate_modules translate_kernel
+#translate: translate_mbr translate_modules translate_kernel
+translate: translate_mbr translate_kernel
 
 ##############################
 ### run QEMU in debug mode ###

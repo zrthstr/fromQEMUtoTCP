@@ -18,6 +18,14 @@ struct idt_entry {
 	uint32_t reserved;
 } __attribute__((packed));
 
+void trigger_breakpoint(void) {
+    __asm__("int3");
+}
+
+void print_own_ret(void){
+	print("I AM INDEED CALLED")
+}
+
 struct idt_ptr {
 	uint16_t limit;
 	uint64_t base;
@@ -73,9 +81,11 @@ void main(void){
 
 	int iiiii  = 0;
 
-	//idt_install();
 
-	__asm__ volatile ("sti"); // set the interrupt flag
+	 //idt_install();
+	 print_own_ret();
+
+	//__asm__ volatile ("sti"); // set the interrupt flag
 
 	 //__asm__ volatile ("cli; hlt");
 
